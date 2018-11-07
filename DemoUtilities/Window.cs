@@ -91,8 +91,8 @@ namespace DemoUtilities
         public Window(string title, Int2 resolution, WindowMode windowMode)
         {
             window = new NativeWindow(resolution.X, resolution.Y, title, GameWindowFlags.FixedWindow, GraphicsMode.Default, DisplayDevice.Default);
-            Debug.Assert(window.ClientSize.Width == resolution.X);
-            Debug.Assert(window.ClientSize.Height == resolution.Y);
+            //Debug.Assert(window.ClientSize.Width == resolution.X); // TODO: High DPI display support
+            //Debug.Assert(window.ClientSize.Height == resolution.Y);
             window.Visible = true;
             Resolution = resolution;
             window.Resize += (form, args) => resized = true;

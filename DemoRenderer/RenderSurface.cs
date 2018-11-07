@@ -54,7 +54,13 @@ namespace DemoRenderer
                 Usage = Usage.RenderTargetOutput
             };
 
-            Device.CreateWithSwapChain(DriverType.Hardware, enableDeviceDebugLayer ? DeviceCreationFlags.Debug : DeviceCreationFlags.None, swapChainDescription,
+            // Select the graphic card with the most memory, which is hopefully also the most powerful // TODO: May not always work: https://stackoverflow.com/questions/37624066/programatically-selecting-the-best-graphics-card-for-directx-rendering
+            Adapter adapter = null;
+            foreach (var a in new Factory1().Adapters)
+                if (adapter == null || adapter.Description.DedicatedVideoMemory < (long)a.Description.DedicatedVideoMemory)
+                    adapter = a;
+
+            Device.CreateWithSwapChain(adapter, enableDeviceDebugLayer ? DeviceCreationFlags.Debug : DeviceCreationFlags.None, swapChainDescription,
                 out Device device, out swapChain);
             var context = device.ImmediateContext;
 
