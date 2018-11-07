@@ -26,6 +26,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BepuPhysics", "BepuPhysics\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DemoEngine", "DemoEngine\DemoEngine.csproj", "{34853617-FEA9-439E-8518-8C2342BCC4FD}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpNeatWalker", "SharpNeatWalker\SharpNeatWalker.csproj", "{05BCAB48-1639-43E0-9EFA-5002D99B8782}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -234,6 +236,30 @@ Global
 		{34853617-FEA9-439E-8518-8C2342BCC4FD}.ReleaseStrip|x64.Build.0 = Release|Any CPU
 		{34853617-FEA9-439E-8518-8C2342BCC4FD}.ReleaseStrip|x86.ActiveCfg = Release|Any CPU
 		{34853617-FEA9-439E-8518-8C2342BCC4FD}.ReleaseStrip|x86.Build.0 = Release|Any CPU
+		{05BCAB48-1639-43E0-9EFA-5002D99B8782}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{05BCAB48-1639-43E0-9EFA-5002D99B8782}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{05BCAB48-1639-43E0-9EFA-5002D99B8782}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{05BCAB48-1639-43E0-9EFA-5002D99B8782}.Debug|ARM.Build.0 = Debug|Any CPU
+		{05BCAB48-1639-43E0-9EFA-5002D99B8782}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{05BCAB48-1639-43E0-9EFA-5002D99B8782}.Debug|x64.Build.0 = Debug|Any CPU
+		{05BCAB48-1639-43E0-9EFA-5002D99B8782}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{05BCAB48-1639-43E0-9EFA-5002D99B8782}.Debug|x86.Build.0 = Debug|Any CPU
+		{05BCAB48-1639-43E0-9EFA-5002D99B8782}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{05BCAB48-1639-43E0-9EFA-5002D99B8782}.Release|Any CPU.Build.0 = Release|Any CPU
+		{05BCAB48-1639-43E0-9EFA-5002D99B8782}.Release|ARM.ActiveCfg = Release|Any CPU
+		{05BCAB48-1639-43E0-9EFA-5002D99B8782}.Release|ARM.Build.0 = Release|Any CPU
+		{05BCAB48-1639-43E0-9EFA-5002D99B8782}.Release|x64.ActiveCfg = Release|Any CPU
+		{05BCAB48-1639-43E0-9EFA-5002D99B8782}.Release|x64.Build.0 = Release|Any CPU
+		{05BCAB48-1639-43E0-9EFA-5002D99B8782}.Release|x86.ActiveCfg = Release|Any CPU
+		{05BCAB48-1639-43E0-9EFA-5002D99B8782}.Release|x86.Build.0 = Release|Any CPU
+		{05BCAB48-1639-43E0-9EFA-5002D99B8782}.ReleaseStrip|Any CPU.ActiveCfg = Release|Any CPU
+		{05BCAB48-1639-43E0-9EFA-5002D99B8782}.ReleaseStrip|Any CPU.Build.0 = Release|Any CPU
+		{05BCAB48-1639-43E0-9EFA-5002D99B8782}.ReleaseStrip|ARM.ActiveCfg = Release|Any CPU
+		{05BCAB48-1639-43E0-9EFA-5002D99B8782}.ReleaseStrip|ARM.Build.0 = Release|Any CPU
+		{05BCAB48-1639-43E0-9EFA-5002D99B8782}.ReleaseStrip|x64.ActiveCfg = Release|Any CPU
+		{05BCAB48-1639-43E0-9EFA-5002D99B8782}.ReleaseStrip|x64.Build.0 = Release|Any CPU
+		{05BCAB48-1639-43E0-9EFA-5002D99B8782}.ReleaseStrip|x86.ActiveCfg = Release|Any CPU
+		{05BCAB48-1639-43E0-9EFA-5002D99B8782}.ReleaseStrip|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

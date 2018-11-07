@@ -1,91 +1,21 @@
-﻿using BepuUtilities;
-using DemoRenderer;
+﻿using System;
+using System.Diagnostics;
+using System.Numerics;
 using BepuPhysics;
 using BepuPhysics.Collidables;
-using System.Numerics;
-using Quaternion = BepuUtilities.Quaternion;
-using System;
 using BepuPhysics.CollisionDetection;
-using System.Runtime.CompilerServices;
-using System.Diagnostics;
 using BepuPhysics.Constraints;
-using DemoContentLoader;
-using DemoUtilities;
+using BepuUtilities;
 using BepuUtilities.Memory;
+using DemoEngine;
+using Demos;
+using Demos.Demos;
+using DemoUtilities;
+using Quaternion = BepuUtilities.Quaternion;
 
-namespace Demos.Demos
+namespace SharpNeatWalker
 {
-    //For the purposes of this demo, we have custom collision filtering rules.
-    public struct RagdollCallbacks : INarrowPhaseCallbacks
-    {
-        public BodyProperty<ulong> Masks;
-        public void Initialize(Simulation simulation)
-        {
-            Masks.Initialize(simulation.Bodies);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool AllowContactGeneration(int workerIndex, CollidableReference a, CollidableReference b)
-        {
-            if (a.Mobility == CollidableMobility.Dynamic && b.Mobility == CollidableMobility.Dynamic)
-            {
-                //The upper 32 bits of the mask hold the ragdoll instance id. Different instances are always allowed to collide.
-                var maskA = Masks[a.Handle];
-                var maskB = Masks[b.Handle];
-                const ulong upperMask = ((ulong)uint.MaxValue << 32);
-                if ((maskA & upperMask) != (maskB & upperMask))
-                    return true;
-                //Bits 0 through 15 contain which local collision groups a body belongs to.
-                //Bits 16 through 31 contain which local collision groups a given body will collide with. 
-                //Note that this only tests a's accepted groups against b's membership, instead of both directions.
-                const ulong lower16Mask = ((1 << 16) - 1);
-                return (((maskA >> 16) & maskB) & lower16Mask) > 0;
-
-                //This demo will ensure symmetry for simplicity. Optionally, you could make use of the fact that collidable references obey an order;
-                //the lower valued handle will always be CollidableReference a. Static collidables will always be in CollidableReference b if they exist.
-            }
-            return true;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool AllowContactGeneration(int workerIndex, CollidablePair pair, int childIndexA, int childIndexB)
-        {
-            return true;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        void ConfigureMaterial(out PairMaterialProperties pairMaterial)
-        {
-            pairMaterial.FrictionCoefficient = 1;
-            pairMaterial.MaximumRecoveryVelocity = 2f;
-            pairMaterial.SpringSettings = new SpringSettings(30, 1);
-        }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe bool ConfigureContactManifold(int workerIndex, CollidablePair pair, NonconvexContactManifold* manifold, out PairMaterialProperties pairMaterial)
-        {
-            ConfigureMaterial(out pairMaterial);
-            return true;
-        }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe bool ConfigureContactManifold(int workerIndex, CollidablePair pair, ConvexContactManifold* manifold, out PairMaterialProperties pairMaterial)
-        {
-            ConfigureMaterial(out pairMaterial);
-            return true;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe bool ConfigureContactManifold(int workerIndex, CollidablePair pair, int childIndexA, int childIndexB, ConvexContactManifold* manifold)
-        {
-            return true;
-        }
-
-        public void Dispose()
-        {
-            Masks.Dispose();
-        }
-    }
-
-    public class RagdollDemo : Demo
+    public class Quadruped : SimulatedObject // Based on RagdollDemo
     {
         static BodyReference AddBody<TShape>(TShape shape, float mass, in RigidPose pose, Simulation simulation) where TShape : struct, IConvexShape
         {
@@ -349,22 +279,24 @@ namespace Demos.Demos
             masks.Allocate(foot.Handle) = footMask;
         }
 
+        private static int _hipsHandle;
         static void AddRagdoll(Vector3 position, Quaternion orientation, int ragdollIndex, BodyProperty<ulong> masks, Simulation simulation)
         {
             var ragdollPose = new RigidPose { Position = position, Orientation = orientation };
             var horizontalOrientation = Quaternion.CreateFromAxisAngle(new Vector3(0, 0, 1), MathHelper.PiOver2);
             var hipsPose = new RigidPose { Position = new Vector3(0, 1.1f, 0), Orientation = horizontalOrientation };
             var hips = AddBody(new Capsule(0.17f, 0.25f), 8, GetWorldPose(hipsPose.Position, hipsPose.Orientation, ragdollPose), simulation);
-            var abdomenPose = new RigidPose { Position = new Vector3(0, 1.3f, 0), Orientation = horizontalOrientation };
+            _hipsHandle = hips.Handle;
+            /*var abdomenPose = new RigidPose { Position = new Vector3(0, 1.3f, 0), Orientation = horizontalOrientation };
             var abdomen = AddBody(new Capsule(0.17f, 0.22f), 7, GetWorldPose(abdomenPose.Position, abdomenPose.Orientation, ragdollPose), simulation);
             var chestPose = new RigidPose { Position = new Vector3(0, 1.6f, 0), Orientation = horizontalOrientation };
             var chest = AddBody(new Capsule(0.21f, 0.3f), 10, GetWorldPose(chestPose.Position, chestPose.Orientation, ragdollPose), simulation);
             var headPose = new RigidPose { Position = new Vector3(0, 2.05f, 0), Orientation = Quaternion.Identity };
-            var head = AddBody(new Sphere(0.2f), 5, GetWorldPose(headPose.Position, headPose.Orientation, ragdollPose), simulation);
+            var head = AddBody(new Sphere(0.2f), 5, GetWorldPose(headPose.Position, headPose.Orientation, ragdollPose), simulation);*/
 
             //Attach constraints between torso pieces.
             var springSettings = new SpringSettings(15f, 1f);
-            var lowerSpine = (hipsPose.Position + abdomenPose.Position) * 0.5f;
+            /*var lowerSpine = (hipsPose.Position + abdomenPose.Position) * 0.5f;
             //Hips-Abdomen
             simulation.Solver.Add(hips.Handle, abdomen.Handle, new BallSocket
             {
@@ -435,7 +367,7 @@ namespace Demos.Demos
                 MaximumAngle = MathHelper.Pi * 0.5f,
                 SpringSettings = springSettings
             });
-            simulation.Solver.Add(chest.Handle, head.Handle, BuildAngularMotor());
+            simulation.Solver.Add(chest.Handle, head.Handle, BuildAngularMotor());*/
 
             var hipsLocalIndex = 0;
             var abdomenLocalIndex = 1;
@@ -451,32 +383,30 @@ namespace Demos.Demos
             DisableCollision(ref chestMask, chestLocalIndex, ref headMask, headLocalIndex);
 
             //Build all the limbs. Setting the masks is delayed until after the limbs have been created and have disabled collisions with the chest/hips.
-            AddArm(1, chestPose.Position + new Vector3(0.4f, 0.1f, 0), chestPose, chest.Handle, chestLocalIndex, ref chestMask, 4, ragdollIndex, ragdollPose, masks, springSettings, simulation);
-            AddArm(-1, chestPose.Position + new Vector3(-0.4f, 0.1f, 0), chestPose, chest.Handle, chestLocalIndex, ref chestMask, 7, ragdollIndex, ragdollPose, masks, springSettings, simulation);
-            AddLeg(hipsPose.Position + new Vector3(-0.17f, -0.2f, 0), hipsPose, hips.Handle, hipsLocalIndex, ref hipsMask, 10, ragdollIndex, ragdollPose, masks, springSettings, simulation);
-            AddLeg(hipsPose.Position + new Vector3(0.17f, -0.2f, 0), hipsPose, hips.Handle, hipsLocalIndex, ref hipsMask, 13, ragdollIndex, ragdollPose, masks, springSettings, simulation);
+            //AddArm(1, chestPose.Position + new Vector3(0.4f, 0.1f, 0), chestPose, chest.Handle, chestLocalIndex, ref chestMask, 4, ragdollIndex, ragdollPose, masks, springSettings, simulation);
+            //AddArm(-1, chestPose.Position + new Vector3(-0.4f, 0.1f, 0), chestPose, chest.Handle, chestLocalIndex, ref chestMask, 7, ragdollIndex, ragdollPose, masks, springSettings, simulation);
+            AddLeg(hipsPose.Position + new Vector3(-0.17f, -0.2f, -0.3f), hipsPose, hips.Handle, hipsLocalIndex, ref hipsMask, 4, ragdollIndex, ragdollPose, masks, springSettings, simulation);
+            AddLeg(hipsPose.Position + new Vector3(0.17f, -0.2f, -0.3f), hipsPose, hips.Handle, hipsLocalIndex, ref hipsMask, 7, ragdollIndex, ragdollPose, masks, springSettings, simulation);
+            AddLeg(hipsPose.Position + new Vector3(-0.17f, -0.2f, 0.3f), hipsPose, hips.Handle, hipsLocalIndex, ref hipsMask, 10, ragdollIndex, ragdollPose, masks, springSettings, simulation);
+            AddLeg(hipsPose.Position + new Vector3(0.17f, -0.2f, 0.3f), hipsPose, hips.Handle, hipsLocalIndex, ref hipsMask, 13, ragdollIndex, ragdollPose, masks, springSettings, simulation);
 
             masks.Allocate(hips.Handle) = hipsMask;
-            masks.Allocate(abdomen.Handle) = abdomenMask;
+            /*masks.Allocate(abdomen.Handle) = abdomenMask;
             masks.Allocate(chest.Handle) = chestMask;
-            masks.Allocate(head.Handle) = headMask;
+            masks.Allocate(head.Handle) = headMask;*/
         }
 
-        public unsafe override void Initialize(ContentArchive content, Camera camera)
+        private Simulation _simulation;
+        public override void InitializePhysics(Simulation simulation, BufferPool bufferPool, SimpleThreadDispatcher threadDispatcher)
         {
-            camera.Position = new Vector3(-20, 10, -20);
-            camera.Yaw = MathHelper.Pi * 3f / 4;
-            camera.Pitch = MathHelper.Pi * 0.05f;
-            var masks = new BodyProperty<ulong>();
-            var callbacks = new RagdollCallbacks { Masks = masks };
-            Simulation = Simulation.Create(BufferPool, callbacks);
-            Simulation.PoseIntegrator.Gravity = new Vector3(0, -10, 0);
+            _simulation = simulation;
+            var masks = ((NarrowPhase<RagdollCallbacks>)simulation.NarrowPhase).Callbacks.Masks;
 
             int ragdollIndex = 0;
             var spacing = new Vector3(2f, 3, 1);
-            int width = 8;
-            int height = 8;
-            int length = 8;
+            int width = 1;
+            int height = 1;
+            int length = 1;
             var origin = -0.5f * spacing * new Vector3(width, 0, length) + new Vector3(0, 0.2f, 0);
             for (int i = 0; i < width; ++i)
             {
@@ -484,31 +414,22 @@ namespace Demos.Demos
                 {
                     for (int k = 0; k < length; ++k)
                     {
-                        AddRagdoll(origin + spacing * new Vector3(i, j, k), Quaternion.CreateFromAxisAngle(new Vector3(0, 1, 0), MathHelper.Pi * 0.05f), ragdollIndex++, masks, Simulation);
+                        AddRagdoll(origin + spacing * new Vector3(i, j, k), Quaternion.CreateFromAxisAngle(new Vector3(0, 1, 0), MathHelper.Pi * 0.05f), ragdollIndex++, masks, _simulation);
                     }
                 }
             }
-
-            var staticShape = new Box(300, 1, 300);
-            var staticShapeIndex = Simulation.Shapes.Add(staticShape);
-            var staticDescription = new StaticDescription
-            {
-                Collidable = new CollidableDescription
-                {
-                    Continuity = new ContinuousDetectionSettings { Mode = ContinuousDetectionMode.Discrete },
-                    Shape = staticShapeIndex,
-                    SpeculativeMargin = 0.1f
-                },
-                Pose = new RigidPose
-                {
-                    Position = new Vector3(0, -0.5f, 0),
-                    Orientation = Quaternion.Identity
-                }
-            };
-            Simulation.Statics.Add(staticDescription);
         }
 
+        public override bool CheckInput(Input input)
+        {
+            if (input.WasPushed(OpenTK.Input.Key.Q))
+            {
+                ref var bodyLocation = ref _simulation.Bodies.HandleToLocation[_hipsHandle];
+                _simulation.Bodies.ActiveSet.Velocities[bodyLocation.Index].Linear = new Vector3(1, 0, 0);
+                // TODO: Wake from sleep if needed
+            }
+            return base.CheckInput(input);
+        }
     }
 }
-
 
