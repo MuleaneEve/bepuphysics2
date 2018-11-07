@@ -15,7 +15,7 @@ using Quaternion = BepuUtilities.Quaternion;
 
 namespace Demos
 {
-    struct Grabber
+    public struct Grabber
     {
         bool active;
         BodyReference body;

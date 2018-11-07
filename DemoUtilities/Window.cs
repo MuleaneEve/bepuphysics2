@@ -18,7 +18,7 @@ namespace DemoUtilities
     /// </summary>
     public class Window : IDisposable
     {
-        internal NativeWindow window;
+        public NativeWindow window;
 
         private bool resized;
 

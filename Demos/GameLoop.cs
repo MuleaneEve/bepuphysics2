@@ -22,7 +22,7 @@ namespace Demos
         public GameLoop(Window window)
         {
             Window = window;
-            Input = new Input(window, Pool);
+            Input = new Input(window.window, Pool);
             var useDebugLayer =
 #if DEBUG
                 true;

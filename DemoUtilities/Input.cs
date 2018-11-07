@@ -107,9 +107,9 @@ namespace DemoUtilities
         /// </summary>
         public float ScrollDelta { get { return ScrolledUp + ScrolledDown; } }
 
-        public Input(Window window, BufferPool pool)
+        public Input(NativeWindow window, BufferPool pool)
         {
-            this.window = window.window;
+            this.window = window;
             this.window.KeyDown += KeyDown;
             this.window.KeyUp += KeyUp;
             this.window.MouseDown += MouseDown;
